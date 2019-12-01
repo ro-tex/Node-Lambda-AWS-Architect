@@ -1,0 +1,44 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "hostedZoneName": {
+      "Type": "String",
+      "Description": "The name of the new Hosted Zone to create"
+    }
+  },
+
+  "Transform": [
+    "AwsArchitectMacros"
+  ],
+
+  "Resources": {
+    "HostedZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "HostedZoneConfig": {
+          "Comment": "Dynamic Hosted Zone"
+        },
+        "Name": { "Ref": "hostedZoneName" }
+      }
+    },
+    "AcmCertificateForHostedZone": {
+      "Type": "AWS::CertificateManager::Certificate",
+      "Properties": {
+        "DomainName": { "Ref": "hostedZoneName" },
+        "SubjectAlternativeNames": [
+          { "Fn::Sub": "*.${hostedZoneName}" }
+        ],
+        "ValidationMethod": "DNS"
+      }
+    },
+    "AcmCertificateValidationForHostedZone": {
+      "Type": "AwsArchitectResource::Route53DnsValidationRecord",
+      "Properties": {
+        "HostedZoneName": { "Fn::Sub": "${hostedZoneName}." },
+        "CertificateName": { "Ref": "hostedZoneName" },
+        "TTL": "300",
+        "Type": "CNAME"
+      }
+    }
+  }
+}
