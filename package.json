@@ -8,8 +8,6 @@
     "start": "nodemon make.js run",
     "build": "node make.js",
     "deploy": "node make.js deploy",
-    "deploy-website": "node make.js deploy-website",
-    "deploy-hosted-zone": "node make.js deploy-hosted-zone",
     "delete": "node make.js delete",
     "test": "mocha tests/**/*.js -R spec"
   },
@@ -41,17 +39,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https//git@source.com/repository.git"
+    "url": "https://gitlab.com/ro-tex/node-lambda-aws-architect.git"
   },
   "keywords": [
     "aws lambda microservice"
   ],
   "author": "Ivaylo Novakov",
-  "license": "BSD-3-Clause",
-  "bugs": {
-    "url": "https://source-code.com/issues"
-  },
-  "homepage": "https://source-code.com",
+  "license": "MIT",
   "engines": {
     "node": ">=8.10.0"
   }
