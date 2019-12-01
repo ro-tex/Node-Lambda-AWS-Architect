@@ -26,7 +26,9 @@ commander
   .command('run')
   .description('Run lambda web service locally.')
   .action(async () => {
-	aws.config.credentials = new aws.SharedIniFileCredentials({ profile: 'default' });
+    aws.config.credentials = new aws.SharedIniFileCredentials({
+      profile: 'default'
+    });
 
     // default logger is console.log, if you want to override it, that can be done here.
     let logger = logMessage => console.log(logMessage);
@@ -195,7 +197,9 @@ commander
   });
 
 commander.on('*', () => {
-	if (commander.args.join(' ') === 'tests/**/*.js') { return; }
+  if (commander.args.join(' ') === 'tests/**/*.js') {
+    return;
+  }
   console.log(`Unknown Command: ${commander.args.join(' ')}`);
   commander.help();
   process.exit(0);

@@ -29,41 +29,64 @@
     },
     "useRoot": {
       "Type": "String",
-      "AllowedValues": ["true", "false"],
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
       "Default": "false",
       "Description": "Create the service record at the root level."
     }
   },
   "Conditions": {
-    "CreateARecordAtRootDomain": {"Fn::Equals": [{"Ref": "useRoot"}, "true"]}
+    "CreateARecordAtRootDomain": {
+      "Fn::Equals": [
+        {
+          "Ref": "useRoot"
+        },
+        "true"
+      ]
+    }
   },
-
   "Transform": [
     "AwsArchitectMacros"
   ],
-
   "Resources": {
     "LambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
-        "FunctionName": { "Ref": "serviceName" },
-        "Description": { "Ref": "serviceDescription" },
+        "FunctionName": {
+          "Ref": "serviceName"
+        },
+        "Description": {
+          "Ref": "serviceDescription"
+        },
         "Handler": "index.handler",
         "Runtime": "nodejs8.10",
         "TracingConfig": {
           "Mode": "Active"
         },
         "Code": {
-          "S3Bucket": { "Ref": "deploymentBucketName" },
-          "S3Key": { "Ref": "deploymentKeyName" }
+          "S3Bucket": {
+            "Ref": "deploymentBucketName"
+          },
+          "S3Key": {
+            "Ref": "deploymentKeyName"
+          }
         },
         "MemorySize": 128,
         "Timeout": 60,
-        "Role": { "Fn::GetAtt": ["LambdaRole", "Arn"] },
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaRole",
+            "Arn"
+          ]
+        },
         "Tags": [
           {
             "Key": "Service",
-            "Value": { "Ref": "serviceName" }
+            "Value": {
+              "Ref": "serviceName"
+            }
           }
         ]
       }
@@ -75,7 +98,9 @@
           "Fn::Join": [
             "",
             [
-              { "Ref": "serviceName" },
+              {
+                "Ref": "serviceName"
+              },
               "LambdaRole"
             ]
           ]
@@ -86,9 +111,13 @@
             {
               "Effect": "Allow",
               "Principal": {
-                "Service": [ "lambda.amazonaws.com" ]
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
               },
-              "Action": [ "sts:AssumeRole" ]
+              "Action": [
+                "sts:AssumeRole"
+              ]
             }
           ]
         },
@@ -111,7 +140,9 @@
                       "",
                       [
                         "arn:aws:dynamodb:*:*:table/",
-                        { "Ref": "serviceName" },
+                        {
+                          "Ref": "serviceName"
+                        },
                         "-*"
                       ]
                     ]
@@ -137,7 +168,9 @@
                       "",
                       [
                         "arn:aws:sqs:*:*:",
-                        { "Ref": "serviceName" },
+                        {
+                          "Ref": "serviceName"
+                        },
                         "-*"
                       ]
                     ]
@@ -152,11 +185,17 @@
                       "",
                       [
                         "arn:aws:s3:::",
-                        { "Ref": "AWS::AccountId"},
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
                         ".",
-                        { "Ref": "serviceName" },
+                        {
+                          "Ref": "serviceName"
+                        },
                         ".",
-                        { "Ref": "hostedName" },
+                        {
+                          "Ref": "hostedName"
+                        },
                         "*"
                       ]
                     ]
@@ -177,10 +216,16 @@
                       ":",
                       [
                         "arn:aws:lambda",
-                        { "Ref": "AWS::Region"},
-                        { "Ref": "AWS::AccountId"},
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
                         "function",
-                        { "Ref": "serviceName" },
+                        {
+                          "Ref": "serviceName"
+                        },
                         "production"
                       ]
                     ]
@@ -193,26 +238,40 @@
         "Path": "/"
       }
     },
-    "LambdaFunctionVersion" : {
-      "Type" : "AWS::Lambda::Version",
-      "Properties" : {
-        "FunctionName" : { "Ref" : "LambdaFunction" },
-        "Description" : "Initial Production Deployed Version"
+    "LambdaFunctionVersion": {
+      "Type": "AWS::Lambda::Version",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "LambdaFunction"
+        },
+        "Description": "Initial Production Deployed Version"
       }
     },
     "ProductionAlias": {
-      "Type" : "AWS::Lambda::Alias",
-      "Properties" : {
-        "Description" : "The production alias",
-        "FunctionName" : { "Fn::GetAtt" : ["LambdaFunction", "Arn"] },
-        "FunctionVersion" : { "Fn::GetAtt" : ["LambdaFunctionVersion", "Version"] },
-        "Name" : "production"
+      "Type": "AWS::Lambda::Alias",
+      "Properties": {
+        "Description": "The production alias",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaFunction",
+            "Arn"
+          ]
+        },
+        "FunctionVersion": {
+          "Fn::GetAtt": [
+            "LambdaFunctionVersion",
+            "Version"
+          ]
+        },
+        "Name": "production"
       }
     },
     "LambdaInvokePermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
-        "FunctionName" : { "Ref": "ProductionAlias" },
+        "FunctionName": {
+          "Ref": "ProductionAlias"
+        },
         "Action": "lambda:InvokeFunction",
         "Principal": "apigateway.amazonaws.com",
         "SourceArn": {
@@ -220,11 +279,17 @@
             "",
             [
               "arn:aws:execute-api:",
-              { "Ref": "AWS::Region" },
+              {
+                "Ref": "AWS::Region"
+              },
               ":",
-              { "Ref": "AWS::AccountId" },
+              {
+                "Ref": "AWS::AccountId"
+              },
               ":",
-              { "Ref": "ApiGateway" },
+              {
+                "Ref": "ApiGateway"
+              },
               "/*"
             ]
           ]
@@ -234,14 +299,22 @@
     "ApiGateway": {
       "Type": "AWS::ApiGateway::RestApi",
       "Properties": {
-        "Description": { "Ref": "serviceDescription" },
-        "Name": { "Ref": "serviceName" },
+        "Description": {
+          "Ref": "serviceDescription"
+        },
+        "Name": {
+          "Ref": "serviceName"
+        },
         "Body": {
           "swagger": "2.0",
           "info": {
-            "description": { "Ref": "serviceDescription" },
+            "description": {
+              "Ref": "serviceDescription"
+            },
             "version": "1.0.0",
-            "title": { "Ref": "serviceName" }
+            "title": {
+              "Ref": "serviceName"
+            }
           },
           "securityDefinitions": {
             "defaultAuth": {
@@ -257,12 +330,20 @@
                     ":",
                     [
                       "arn:aws:apigateway",
-                      { "Ref": "AWS::Region" },
+                      {
+                        "Ref": "AWS::Region"
+                      },
                       "lambda:path/2015-03-31/functions/arn:aws:lambda",
-                      { "Ref": "AWS::Region" },
-                      { "Ref": "AWS::AccountId" },
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
                       "function",
-                      { "Ref": "serviceName" },
+                      {
+                        "Ref": "serviceName"
+                      },
                       "${stageVariables.lambdaVersion}/invocations"
                     ]
                   ]
@@ -271,7 +352,14 @@
               }
             }
           },
-          "x-amazon-apigateway-binary-media-types": [ "application/octet", "image/jpeg", "image/jpg", "image/png", "multipart/form-data", "image/*" ],
+          "x-amazon-apigateway-binary-media-types": [
+            "application/octet",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "multipart/form-data",
+            "image/*"
+          ],
           "x-amazon-apigateway-gateway-responses": {
             "DEFAULT_4XX": {
               "responseParameters": {
@@ -299,12 +387,20 @@
                       ":",
                       [
                         "arn:aws:apigateway",
-                        { "Ref": "AWS::Region" },
+                        {
+                          "Ref": "AWS::Region"
+                        },
                         "lambda:path/2015-03-31/functions/arn:aws:lambda",
-                        { "Ref": "AWS::Region" },
-                        { "Ref": "AWS::AccountId" },
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
                         "function",
-                        { "Ref": "serviceName" },
+                        {
+                          "Ref": "serviceName"
+                        },
                         "${stageVariables.lambdaVersion}/invocations"
                       ]
                     ]
@@ -327,12 +423,20 @@
                       ":",
                       [
                         "arn:aws:apigateway",
-                        { "Ref": "AWS::Region" },
+                        {
+                          "Ref": "AWS::Region"
+                        },
                         "lambda:path/2015-03-31/functions/arn:aws:lambda",
-                        { "Ref": "AWS::Region" },
-                        { "Ref": "AWS::AccountId" },
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
                         "function",
-                        { "Ref": "serviceName" },
+                        {
+                          "Ref": "serviceName"
+                        },
                         "${stageVariables.lambdaVersion}/invocations"
                       ]
                     ]
@@ -355,12 +459,20 @@
                       ":",
                       [
                         "arn:aws:apigateway",
-                        { "Ref": "AWS::Region" },
+                        {
+                          "Ref": "AWS::Region"
+                        },
                         "lambda:path/2015-03-31/functions/arn:aws:lambda",
-                        { "Ref": "AWS::Region" },
-                        { "Ref": "AWS::AccountId" },
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
                         "function",
-                        { "Ref": "serviceName" },
+                        {
+                          "Ref": "serviceName"
+                        },
                         "${stageVariables.lambdaVersion}/invocations"
                       ]
                     ]
@@ -376,15 +488,19 @@
                 "produces": [
                   "application/json"
                 ],
-                "security": [{
-                  "defaultAuth": []
-                }],
-                "parameters": [{
-                  "name": "proxy",
-                  "in": "path",
-                  "required": true,
-                  "type": "string"
-                }],
+                "security": [
+                  {
+                    "defaultAuth": []
+                  }
+                ],
+                "parameters": [
+                  {
+                    "name": "proxy",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                  }
+                ],
                 "responses": {},
                 "x-amazon-apigateway-integration": {
                   "uri": {
@@ -392,12 +508,20 @@
                       ":",
                       [
                         "arn:aws:apigateway",
-                        { "Ref": "AWS::Region" },
+                        {
+                          "Ref": "AWS::Region"
+                        },
                         "lambda:path/2015-03-31/functions/arn:aws:lambda",
-                        { "Ref": "AWS::Region" },
-                        { "Ref": "AWS::AccountId" },
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        {
+                          "Ref": "AWS::AccountId"
+                        },
                         "function",
-                        { "Ref": "serviceName" },
+                        {
+                          "Ref": "serviceName"
+                        },
                         "${stageVariables.lambdaVersion}/invocations"
                       ]
                     ]
@@ -408,12 +532,14 @@
                 }
               },
               "options": {
-                "parameters": [{
-                  "name": "proxy",
-                  "in": "path",
-                  "required": true,
-                  "type": "string"
-                }],
+                "parameters": [
+                  {
+                    "name": "proxy",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                  }
+                ],
                 "consumes": [
                   "application/json"
                 ],
@@ -462,7 +588,9 @@
           }
         },
         "EndpointConfiguration": {
-          "Types": [ "REGIONAL" ]
+          "Types": [
+            "REGIONAL"
+          ]
         }
       }
     },
@@ -470,7 +598,9 @@
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "Description": "Initial Setup Deployment (WARNING: This resource must stay constant, do not update in CF ever)",
-        "RestApiId": { "Ref": "ApiGateway" },
+        "RestApiId": {
+          "Ref": "ApiGateway"
+        },
         "StageDescription": {
           "Variables": {
             "lambdaVersion": "production"
@@ -482,11 +612,15 @@
     "DynamicAcmCertificate": {
       "Type": "AwsArchitectResource::VirtualCertificate",
       "Properties": {
-        "DomainName": { "Ref": "hostedName" },
+        "DomainName": {
+          "Ref": "hostedName"
+        },
         "Region": {
           "Fn::If": [
             "CreateARecordAtRootDomain",
-            { "Ref": "AWS::Region" },
+            {
+              "Ref": "AWS::Region"
+            },
             "us-east-1"
           ]
         }
@@ -498,22 +632,35 @@
         "DomainName": {
           "Fn::If": [
             "CreateARecordAtRootDomain",
-            { "Ref": "hostedName" },
+            {
+              "Ref": "hostedName"
+            },
             {
               "Fn::Join": [
                 ".",
                 [
-                  { "Ref": "dnsName" },
-                  { "Ref": "hostedName" }
+                  {
+                    "Ref": "dnsName"
+                  },
+                  {
+                    "Ref": "hostedName"
+                  }
                 ]
               ]
             }
           ]
         },
         "EndpointConfiguration": {
-          "Types": [ "REGIONAL" ]
+          "Types": [
+            "REGIONAL"
+          ]
         },
-        "RegionalCertificateArn": { "Fn::GetAtt": [ "DynamicAcmCertificate", "CertificateArn" ] }
+        "RegionalCertificateArn": {
+          "Fn::GetAtt": [
+            "DynamicAcmCertificate",
+            "CertificateArn"
+          ]
+        }
       }
     },
     "ServiceDomainNameTst": {
@@ -527,7 +674,9 @@
                 ".",
                 [
                   "tst",
-                  { "Ref": "hostedName" }
+                  {
+                    "Ref": "hostedName"
+                  }
                 ]
               ]
             },
@@ -536,26 +685,47 @@
                 "",
                 [
                   "tst-",
-                  { "Ref": "dnsName" },
+                  {
+                    "Ref": "dnsName"
+                  },
                   ".",
-                  { "Ref": "hostedName" }
+                  {
+                    "Ref": "hostedName"
+                  }
                 ]
               ]
             }
           ]
         },
         "EndpointConfiguration": {
-          "Types": [ "REGIONAL" ]
+          "Types": [
+            "REGIONAL"
+          ]
         },
-        "RegionalCertificateArn": { "Fn::GetAtt": [ "DynamicAcmCertificate", "CertificateArn" ] }
+        "RegionalCertificateArn": {
+          "Fn::GetAtt": [
+            "DynamicAcmCertificate",
+            "CertificateArn"
+          ]
+        }
       }
     },
     "Route53MapToCustomDomain": {
       "Type": "AWS::Route53::RecordSet",
       "Properties": {
         "AliasTarget": {
-          "DNSName": { "Fn::GetAtt": [ "ServiceDomainName", "RegionalDomainName" ] },
-          "HostedZoneId": { "Fn::GetAtt": [ "ServiceDomainName", "RegionalHostedZoneId" ] }
+          "DNSName": {
+            "Fn::GetAtt": [
+              "ServiceDomainName",
+              "RegionalDomainName"
+            ]
+          },
+          "HostedZoneId": {
+            "Fn::GetAtt": [
+              "ServiceDomainName",
+              "RegionalHostedZoneId"
+            ]
+          }
         },
         "HostedZoneName": {
           "Fn::Join": [
@@ -573,7 +743,9 @@
             "",
             [
               "Created for service",
-              { "Ref": "serviceName" }
+              {
+                "Ref": "serviceName"
+              }
             ]
           ]
         },
@@ -584,7 +756,9 @@
               "Fn::Join": [
                 "",
                 [
-                  { "Ref": "hostedName" },
+                  {
+                    "Ref": "hostedName"
+                  },
                   "."
                 ]
               ]
@@ -593,8 +767,12 @@
               "Fn::Join": [
                 ".",
                 [
-                  { "Ref": "dnsName" },
-                  { "Ref": "hostedName" },
+                  {
+                    "Ref": "dnsName"
+                  },
+                  {
+                    "Ref": "hostedName"
+                  },
                   ""
                 ]
               ]
@@ -608,8 +786,18 @@
       "Type": "AWS::Route53::RecordSet",
       "Properties": {
         "AliasTarget": {
-          "DNSName": { "Fn::GetAtt": [ "ServiceDomainNameTst", "RegionalDomainName" ] },
-          "HostedZoneId": { "Fn::GetAtt": [ "ServiceDomainNameTst", "RegionalHostedZoneId" ] }
+          "DNSName": {
+            "Fn::GetAtt": [
+              "ServiceDomainNameTst",
+              "RegionalDomainName"
+            ]
+          },
+          "HostedZoneId": {
+            "Fn::GetAtt": [
+              "ServiceDomainNameTst",
+              "RegionalHostedZoneId"
+            ]
+          }
         },
         "HostedZoneName": {
           "Fn::Join": [
@@ -627,7 +815,9 @@
             "",
             [
               "Created for service",
-              { "Ref": "serviceName" }
+              {
+                "Ref": "serviceName"
+              }
             ]
           ]
         },
@@ -639,7 +829,9 @@
                 "",
                 [
                   "tst.",
-                  { "Ref": "hostedName" },
+                  {
+                    "Ref": "hostedName"
+                  },
                   "."
                 ]
               ]
@@ -649,9 +841,13 @@
                 "",
                 [
                   "tst-",
-                  { "Ref": "dnsName" },
+                  {
+                    "Ref": "dnsName"
+                  },
                   ".",
-                  { "Ref": "hostedName" },
+                  {
+                    "Ref": "hostedName"
+                  },
                   "."
                 ]
               ]
@@ -667,22 +863,33 @@
         "DomainName": {
           "Fn::If": [
             "CreateARecordAtRootDomain",
-            { "Ref": "hostedName" },
+            {
+              "Ref": "hostedName"
+            },
             {
               "Fn::Join": [
                 ".",
                 [
-                  { "Ref": "dnsName" },
-                  { "Ref": "hostedName" }
+                  {
+                    "Ref": "dnsName"
+                  },
+                  {
+                    "Ref": "hostedName"
+                  }
                 ]
               ]
             }
           ]
         },
-        "RestApiId": { "Ref": "ApiGateway" },
+        "RestApiId": {
+          "Ref": "ApiGateway"
+        },
         "Stage": "production"
       },
-      "DependsOn": ["StageDeployment", "ServiceDomainName"]
+      "DependsOn": [
+        "StageDeployment",
+        "ServiceDomainName"
+      ]
     },
     "BasePathMappingTst": {
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -695,7 +902,9 @@
                 ".",
                 [
                   "tst",
-                  { "Ref": "hostedName" }
+                  {
+                    "Ref": "hostedName"
+                  }
                 ]
               ]
             },
@@ -704,17 +913,26 @@
                 "",
                 [
                   "tst-",
-                  { "Ref": "dnsName" },
+                  {
+                    "Ref": "dnsName"
+                  },
                   ".",
-                  { "Ref": "hostedName" }
+                  {
+                    "Ref": "hostedName"
+                  }
                 ]
               ]
             }
           ]
         },
-        "RestApiId": { "Ref": "ApiGateway" }
+        "RestApiId": {
+          "Ref": "ApiGateway"
+        }
       },
-      "DependsOn": ["StageDeployment", "ServiceDomainNameTst"]
+      "DependsOn": [
+        "StageDeployment",
+        "ServiceDomainNameTst"
+      ]
     }
   }
 }

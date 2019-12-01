@@ -2,12 +2,20 @@ const aws = require('aws-sdk');
 const Api = require('openapi-factory');
 const path = require('path');
 const fs = require('fs-extra');
-const { Authorizer, RequestLogger, PlatformClient } = require('microservice-utilities');
+const {
+  Authorizer,
+  RequestLogger,
+  PlatformClient
+} = require('microservice-utilities');
 
 let logger = new RequestLogger();
 const api = new Api({
   requestMiddleware(request) {
-		logger.log({ title: 'RequestLogger', level: 'INFO', request: request });
+    logger.log({
+      title: 'RequestLogger',
+      level: 'INFO',
+      request: request
+    });
     let userToken = request.requestContext.authorizer && request.requestContext.authorizer.jwt;
     request.userPlatformClient = new PlatformClient(msg => logger.log(msg), () => userToken);
     return request;
@@ -15,7 +23,9 @@ const api = new Api({
 });
 module.exports = api;
 
-const authorizerConfiguration = { jwkKeyListUrl: 'https://authorization.domain.com/.well-known/jwks.json' };
+const authorizerConfiguration = {
+  jwkKeyListUrl: 'https://authorization.domain.com/.well-known/jwks.json'
+};
 let authorizer = new Authorizer(msg => logger.log(msg), authorizerConfiguration);
 
 api.onEvent(trigger => {});
@@ -28,15 +38,31 @@ api.setAuthorizer(request => {
 api.get('/.well-known/openapi.json', async () => {
   let openapiFile = path.join(__dirname, './openapi.json');
   let data = await fs.readJson(openapiFile);
-	return { statusCode: 200, body: data };
+  return {
+    statusCode: 200,
+    body: data
+  };
 });
 
 api.get('/livecheck', () => {
-	return { statusCode: 200, body: { field: 'hello world' } };
+  return {
+    statusCode: 200,
+    body: {
+      field: 'hello world'
+    }
+  };
 });
 
 api.get('/v1/resource/{resourceId}', request => {
-	return { statusCode: 200, body: { resourceId: request.pathParameters.resourceId }, headers: { 'Content-Type': 'application/json' } };
+  return {
+    statusCode: 200,
+    body: {
+      resourceId: request.pathParameters.resourceId
+    },
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  };
 });
 
 api.options('/{proxy+}', request => {
@@ -84,5 +110,7 @@ api.any('/{proxy+}', request => {
   		}
   	}
   */
-	return { statusCode: 404 };
+  return {
+    statusCode: 404
+  };
 });
