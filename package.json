@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "aws-architect": "^6.2",
-    "aws-sdk": "^2.580.0",
+    "aws-sdk": "^2.814.0",
     "chai": "^4.2.0",
     "commander": "^4.0.1",
     "error-object-polyfill": "^1.0.13",
